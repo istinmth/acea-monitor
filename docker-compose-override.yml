@@ -1,0 +1,6 @@
+version: '3'
+
+services:
+  acea-monitor:
+    volumes:
+      - ./pdfservices-api-credentials.json:/app/config/pdfservices-api-credentials.json:ro

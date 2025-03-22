@@ -15,6 +15,8 @@ from openpyxl.styles import Font, Alignment, Border, Side
 import re
 import tempfile
 import locale
+import adobe_utils
+import excel_formatter
 
 # Set up logging
 logging.basicConfig(
@@ -71,111 +73,36 @@ scheduler.start()
 
 def convert_pdf_to_excel(pdf_path, excel_path):
     """
-    Convert a PDF to Excel with specific formatting:
-    - Each page becomes a worksheet
-    - "," as thousands separator
-    - "." as decimal separator
+    Convert a PDF to Excel using Adobe PDF Services API.
+    
+    Args:
+        pdf_path (str): Path to the source PDF file
+        excel_path (str): Path where the Excel file should be saved
+        
+    Returns:
+        bool: True if conversion was successful, False otherwise
     """
     try:
-        # Set locale for number formatting
-        locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
+        # Use Adobe API with formatting
+        logger.info(f"Converting PDF to Excel using Adobe API: {pdf_path}")
         
-        # Create a new Excel workbook
-        workbook = openpyxl.Workbook()
+        # First, use Adobe API to convert
+        success = adobe_utils.convert_pdf_to_excel(pdf_path, excel_path)
         
-        # Remove the default sheet
-        default_sheet = workbook.active
-        workbook.remove(default_sheet)
-        
-        # Extract base filename without extension for sheet naming
-        base_filename = os.path.basename(pdf_path).replace('.pdf', '')
-        
-        # Open the PDF
-        with pdfplumber.open(pdf_path) as pdf:
-            # For each page in the PDF
-            for i, page in enumerate(pdf.pages):
-                # Create a worksheet for this page
-                sheet_name = f"Page {i+1}"
-                if i == 0:
-                    sheet_name = "Summary"  # First page is usually a summary
-                worksheet = workbook.create_sheet(title=sheet_name)
-                
-                # Extract tables from the page
-                tables = page.extract_tables()
-                
-                # If no tables found, try to extract text and make a simple table
-                if not tables:
-                    text = page.extract_text()
-                    if text:
-                        lines = text.split('\n')
-                        for row_idx, line in enumerate(lines, 1):
-                            worksheet.cell(row=row_idx, column=1, value=line)
-                    continue
-                
-                # Process each table
-                row_offset = 1
-                for table_idx, table in enumerate(tables):
-                    if table_idx > 0:
-                        row_offset += 2  # Add space between tables
-                    
-                    # Write each row of the table
-                    for row_idx, row in enumerate(table, row_offset):
-                        for col_idx, cell in enumerate(row, 1):
-                            if cell is not None:
-                                # Try to convert numbers and format them
-                                cell_value = cell.strip() if isinstance(cell, str) else cell
-                                
-                                # Check if the cell appears to be a number
-                                if isinstance(cell_value, str):
-                                    # Remove any existing commas
-                                    cell_value = cell_value.replace(',', '')
-                                    
-                                    # Try to convert to a number
-                                    try:
-                                        if '.' in cell_value:
-                                            cell_value = float(cell_value)
-                                        elif cell_value.isdigit():
-                                            cell_value = int(cell_value)
-                                    except ValueError:
-                                        pass  # Keep as string if conversion fails
-                                
-                                # Write to the cell
-                                cell_obj = worksheet.cell(row=row_idx, column=col_idx, value=cell_value)
-                                
-                                # Format numbers with appropriate separators
-                                if isinstance(cell_value, (int, float)):
-                                    if isinstance(cell_value, int):
-                                        cell_obj.number_format = '#,##0'  # Thousands separator
-                                    else:
-                                        cell_obj.number_format = '#,##0.00'  # Decimal and thousands
-                                
-                                # Style header cells (usually first row)
-                                if row_idx == row_offset:
-                                    cell_obj.font = Font(bold=True)
-                                    cell_obj.alignment = Alignment(horizontal='center')
-                    
-                    row_offset = row_idx + 1
-                
-                # Auto-adjust column widths
-                for column in worksheet.columns:
-                    max_length = 0
-                    column_letter = openpyxl.utils.get_column_letter(column[0].column)
-                    for cell in column:
-                        if cell.value:
-                            cell_length = len(str(cell.value))
-                            if cell_length > max_length:
-                                max_length = cell_length
-                    
-                    # Set width with some padding
-                    worksheet.column_dimensions[column_letter].width = max_length + 4
-        
-        # Save the workbook
-        workbook.save(excel_path)
-        return True
+        if success:
+            # Apply number formatting
+            format_success = excel_formatter.format_excel_numbers(excel_path)
+            if not format_success:
+                logger.warning(f"Number formatting failed: {excel_path}")
+            
+            logger.info(f"Adobe API conversion successful: {excel_path}")
+            return True
+        else:
+            logger.error(f"Adobe PDF Services API conversion failed for: {pdf_path}")
+            return False
+    
     except Exception as e:
-        logger.error(f"Error converting PDF to Excel: {e}")
-        with open(CONVERSION_LOG, 'a') as f:
-            f.write(f"{datetime.datetime.now()}: Error converting {pdf_path}: {str(e)}\n")
+        logger.error(f"Error in PDF to Excel conversion: {e}")
         return False
 
 def get_excel_path(pdf_path):
@@ -217,8 +144,8 @@ def index():
         'cv_reports': conn.execute('SELECT COUNT(*) FROM reports WHERE type = "CV"').fetchone()[0]
     }
     
-    # Get months with data
-    months_with_data = conn.execute(
+    # Get months with data and convert to regular dictionaries
+    month_rows = conn.execute(
         '''SELECT strftime('%Y-%m', publish_date) as month, 
                   COUNT(*) as count 
            FROM reports 
@@ -226,6 +153,14 @@ def index():
            ORDER BY month DESC 
            LIMIT 12'''
     ).fetchall()
+    
+    # Convert Row objects to plain dictionaries
+    months_with_data = []
+    for row in month_rows:
+        months_with_data.append({
+            'month': row['month'],
+            'count': row['count']
+        })
     
     conn.close()
     
@@ -246,7 +181,7 @@ def index():
         pc_reports=pc_reports, 
         cv_reports=cv_reports,
         stats=stats,
-        months=months_with_data,
+        months_with_data=months_with_data,
         last_scan=last_scan
     )
 

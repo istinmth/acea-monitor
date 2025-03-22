@@ -355,10 +355,10 @@
         }
         
         // Create monthly chart
-        const months = JSON.parse('{{ months|tojson }}');
-        if (months && months.length > 0) {
-            const labels = months.map(m => m.month);
-            const data = months.map(m => m.count);
+        const monthsData = {{ months_with_data|tojson|safe }};
+        if (monthsData && monthsData.length > 0) {
+            const labels = monthsData.map(m => m.month);
+            const data = monthsData.map(m => m.count);
             
             const ctx = document.getElementById('monthlyChart').getContext('2d');
             new Chart(ctx, {
