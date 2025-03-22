@@ -13,19 +13,19 @@
                 <div class="row">
                     <div class="col-md-4">
                         <div class="card stats-card">
-                            <div id="totalReports" class="stats-number">-</div>
+                            <div id="totalReports" class="stats-number">{{ stats.total_reports }}</div>
                             <div class="stats-label">Total Reports</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="card stats-card">
-                            <div id="pcReports" class="stats-number">-</div>
+                            <div id="pcReports" class="stats-number">{{ stats.pc_reports }}</div>
                             <div class="stats-label">PC Reports</div>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="card stats-card">
-                            <div id="cvReports" class="stats-number">-</div>
+                            <div id="cvReports" class="stats-number">{{ stats.cv_reports }}</div>
                             <div class="stats-label">CV Reports</div>
                         </div>
                     </div>
@@ -39,6 +39,73 @@
                     <div class="col-md-6">
                         <div class="alert alert-info">
                             <i class="bi bi-calendar"></i> Next Scan: <strong id="nextScan">Loading...</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Monthly Reports Distribution</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="height: 200px;">
+                                    <canvas id="monthlyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-tools"></i> Tools</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-arrow-repeat text-primary" style="font-size: 2rem;"></i>
+                                <h5 class="mt-3">Update Reports</h5>
+                                <p class="text-muted">Scan for new ACEA reports</p>
+                                <button class="btn btn-primary" id="runScanBtn">
+                                    <i class="bi bi-arrow-repeat"></i> Run Scan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-file-earmark-excel text-success" style="font-size: 2rem;"></i>
+                                <h5 class="mt-3">Convert All PDFs</h5>
+                                <p class="text-muted">Convert all PDFs to Excel format</p>
+                                <button class="btn btn-success" id="convertAllBtn">
+                                    <i class="bi bi-file-earmark-excel"></i> Convert All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-trash text-danger" style="font-size: 2rem;"></i>
+                                <h5 class="mt-3">Delete Management</h5>
+                                <p class="text-muted">View reports & manage deletion</p>
+                                <a href="/reports/PC" class="btn btn-outline-primary">
+                                    <i class="bi bi-car-front"></i> PC Reports
+                                </a>
+                                <a href="/reports/CV" class="btn btn-outline-primary">
+                                    <i class="bi bi-truck"></i> CV Reports
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -64,11 +131,16 @@
                                 <small class="report-date">{{ report.publish_date }}</small>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mt-2">
+                                <div>
+                                    <a href="/pdf/{{ report.pdf_path.split('/')[-1] }}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-file-pdf"></i> PDF
+                                    </a>
+                                    <a href="/convert/{{ report.id }}" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-file-earmark-excel"></i> Excel
+                                    </a>
+                                </div>
                                 <a href="{{ report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-link-45deg"></i> View Page
-                                </a>
-                                <a href="/pdf/{{ report.pdf_path.split('/')[-1] }}" target="_blank" class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-file-pdf"></i> View PDF
+                                    <i class="bi bi-link-45deg"></i> Source
                                 </a>
                             </div>
                         </div>
@@ -99,11 +171,16 @@
                                 <small class="report-date">{{ report.publish_date }}</small>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mt-2">
+                                <div>
+                                    <a href="/pdf/{{ report.pdf_path.split('/')[-1] }}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-file-pdf"></i> PDF
+                                    </a>
+                                    <a href="/convert/{{ report.id }}" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-file-earmark-excel"></i> Excel
+                                    </a>
+                                </div>
                                 <a href="{{ report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-link-45deg"></i> View Page
-                                </a>
-                                <a href="/pdf/{{ report.pdf_path.split('/')[-1] }}" target="_blank" class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-file-pdf"></i> View PDF
+                                    <i class="bi bi-link-45deg"></i> Source
                                 </a>
                             </div>
                         </div>
@@ -118,21 +195,44 @@
         </div>
     </div>
 </div>
+
+<!-- Modal for batch conversion status -->
+<div class="modal fade" id="conversionModal" tabindex="-1" aria-labelledby="conversionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="conversionModalLabel">Converting PDFs to Excel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="conversionInProgress">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Converting PDFs to Excel. This may take a while...</p>
+                </div>
+                <div id="conversionSuccess" style="display: none;">
+                    <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                    <p class="mt-2" id="conversionSuccessMessage">Conversion completed successfully!</p>
+                </div>
+                <div id="conversionError" style="display: none;">
+                    <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                    <p class="mt-2" id="conversionErrorMessage">Error during conversion.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="refreshAfterConversion" style="display: none;">Refresh Page</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Fetch statistics
-        fetch('/api/stats')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('totalReports').textContent = data.total_reports;
-                document.getElementById('pcReports').textContent = data.pc_reports;
-                document.getElementById('cvReports').textContent = data.cv_reports;
-            })
-            .catch(error => console.error('Error fetching stats:', error));
-        
         // Calculate next scan time (12 hours from last scan)
         const lastScanText = "{{ last_scan }}";
         if (lastScanText && lastScanText !== "Unknown") {
@@ -145,6 +245,145 @@
             }
         } else {
             document.getElementById('nextScan').textContent = "Scheduled (within 12 hours)";
+        }
+        
+        // Scan button
+        const runScanBtn = document.getElementById('runScanBtn');
+        const scanModal = new bootstrap.Modal(document.getElementById('scanModal'));
+        const scanInProgress = document.getElementById('scanInProgress');
+        const scanSuccess = document.getElementById('scanSuccess');
+        const scanError = document.getElementById('scanError');
+        const refreshAfterScan = document.getElementById('refreshAfterScan');
+        
+        if (runScanBtn) {
+            runScanBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Show the modal with progress indication
+                scanInProgress.style.display = 'block';
+                scanSuccess.style.display = 'none';
+                scanError.style.display = 'none';
+                refreshAfterScan.style.display = 'none';
+                scanModal.show();
+                
+                // Make the API call to run the scan
+                fetch('/run-scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    scanInProgress.style.display = 'none';
+                    if (data.success) {
+                        scanSuccess.style.display = 'block';
+                    } else {
+                        scanError.style.display = 'block';
+                    }
+                    refreshAfterScan.style.display = 'block';
+                })
+                .catch(error => {
+                    scanInProgress.style.display = 'none';
+                    scanError.style.display = 'block';
+                    refreshAfterScan.style.display = 'block';
+                    console.error('Error:', error);
+                });
+            });
+        }
+        
+        // Convert All button
+        const convertAllBtn = document.getElementById('convertAllBtn');
+        const conversionModal = new bootstrap.Modal(document.getElementById('conversionModal'));
+        const conversionInProgress = document.getElementById('conversionInProgress');
+        const conversionSuccess = document.getElementById('conversionSuccess');
+        const conversionError = document.getElementById('conversionError');
+        const conversionSuccessMessage = document.getElementById('conversionSuccessMessage');
+        const conversionErrorMessage = document.getElementById('conversionErrorMessage');
+        const refreshAfterConversion = document.getElementById('refreshAfterConversion');
+        
+        if (convertAllBtn) {
+            convertAllBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Show the modal with progress indication
+                conversionInProgress.style.display = 'block';
+                conversionSuccess.style.display = 'none';
+                conversionError.style.display = 'none';
+                refreshAfterConversion.style.display = 'none';
+                conversionModal.show();
+                
+                // Make the API call to convert all PDFs
+                fetch('/convert-all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    conversionInProgress.style.display = 'none';
+                    if (data.success) {
+                        conversionSuccessMessage.textContent = data.message;
+                        conversionSuccess.style.display = 'block';
+                    } else {
+                        conversionErrorMessage.textContent = data.message;
+                        conversionError.style.display = 'block';
+                    }
+                    refreshAfterConversion.style.display = 'block';
+                })
+                .catch(error => {
+                    conversionInProgress.style.display = 'none';
+                    conversionErrorMessage.textContent = 'Error during conversion. Please check logs.';
+                    conversionError.style.display = 'block';
+                    refreshAfterConversion.style.display = 'block';
+                    console.error('Error:', error);
+                });
+            });
+        }
+        
+        if (refreshAfterScan) {
+            refreshAfterScan.addEventListener('click', function() {
+                window.location.reload();
+            });
+        }
+        
+        if (refreshAfterConversion) {
+            refreshAfterConversion.addEventListener('click', function() {
+                window.location.reload();
+            });
+        }
+        
+        // Create monthly chart
+        const months = JSON.parse('{{ months|tojson }}');
+        if (months && months.length > 0) {
+            const labels = months.map(m => m.month);
+            const data = months.map(m => m.count);
+            
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Reports by Month',
+                        data: data,
+                        backgroundColor: '#3498db',
+                        borderColor: '#2980b9',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            precision: 0
+                        }
+                    }
+                }
+            });
         }
     });
 </script>
