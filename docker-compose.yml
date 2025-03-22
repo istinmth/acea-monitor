@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  acea-monitor:
+    build: .
+    container_name: acea-monitor
+    restart: unless-stopped
+    ports:
+      - "9734:9734"
+    volumes:
+      - acea_data:/app/data
+      - acea_logs:/app/logs
+    environment:
+      - TZ=Europe/London
+    labels:
+      - "com.unraid.docker.icon=https://www.flaticon.com/download/icon/3870553?icon_id=3870553&author=228&team=228&keyword=Lemming&pack=3866953&style=1&style_id=6&format=png&color=%23000000&colored=2&size=512&selection=1&type=standard&search=lemming"
+      - "com.unraid.docker.webui=http://[IP]:[PORT:9734]/"
+      - "com.unraid.docker.overview=ACEA Auto Reports Monitor - Automatically collects and organizes ACEA auto industry reports."
+      - "com.unraid.docker.template_url=https://github.com/istinmth/acea-monitor/templates/docker-template.xml"
+
+volumes:
+  acea_data:
+    driver: local
+  acea_logs:
+    driver: local

@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>acea-monitor</Name>
+  <Repository>istinmth/acea-monitor:latest</Repository>
+  <Registry>https://hub.docker.com/r/istinmth/acea-monitor/</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/istinmth/acea-monitor/issues</Support>
+  <Project>https://github.com/istinmth/acea-monitor</Project>
+  <Overview>ACEA Auto Reports Monitor - Automatically collects, downloads, and organizes automobile industry reports from ACEA (European Automobile Manufacturers Association).</Overview>
+  <Category>Tools: Status:Stable</Category>
+  <WebUI>http://[IP]:[PORT:9734]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/istinmth/acea-monitor/main/docker-template.xml</TemplateURL>
+  <Icon>https://cdn-icons-png.flaticon.com/512/2432/2432572.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled>1711126344</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="WebUI Port" Target="9734" Default="9734" Mode="tcp" Description="Web interface port" Type="Port" Display="always" Required="true" Mask="false">9734</Config>
+  <Config Name="Data Volume" Target="/app/data" Default="/mnt/user/appdata/acea-monitor/data" Mode="rw" Description="Where PDFs and the database are stored" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/acea-monitor/data</Config>
+  <Config Name="Logs Volume" Target="/app/logs" Default="/mnt/user/appdata/acea-monitor/logs" Mode="rw" Description="Where application logs are stored" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/acea-monitor/logs</Config>
+  <Config Name="Timezone" Target="TZ" Default="Europe/London" Mode="" Description="Timezone for the container" Type="Variable" Display="advanced" Required="false" Mask="false">Europe/London</Config>
+</Container>

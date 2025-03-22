@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if report_type == 'PC' %}
+        Passenger Car Reports
+    {% else %}
+        Commercial Vehicle Reports
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            {% if report_type == 'PC' %}
+                <i class="bi bi-car-front"></i> All Passenger Car (PC) Reports
+            {% else %}
+                <i class="bi bi-truck"></i> All Commercial Vehicle (CV) Reports
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if reports %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                            <tr>
+                                <td>{{ report.title }}</td>
+                                <td>{{ report.publish_date }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ report.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-link-45deg"></i> Page
+                                        </a>
+                                        <a href="/pdf/{{ report.pdf_path.split('/')[-1] }}" target="_blank" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-file-pdf"></i> PDF
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i> No reports found.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
