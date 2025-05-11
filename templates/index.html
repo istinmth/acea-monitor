@@ -237,10 +237,21 @@
         const lastScanText = "{{ last_scan }}";
         if (lastScanText && lastScanText !== "Unknown") {
             try {
-                const lastScanDate = new Date(lastScanText);
+                // Parse date parts correctly
+                const parts = lastScanText.split(/[\s-:]/g).filter(Boolean);
+                // Create date object (year, month-1, day, hour, minute, second)
+                const lastScanDate = new Date(
+                    parseInt(parts[0]), 
+                    parseInt(parts[1])-1, 
+                    parseInt(parts[2]),
+                    parseInt(parts[3]), 
+                    parseInt(parts[4]), 
+                    parseInt(parts[5])
+                );
                 const nextScanDate = new Date(lastScanDate.getTime() + 12 * 60 * 60 * 1000);
                 document.getElementById('nextScan').textContent = nextScanDate.toLocaleString();
             } catch (e) {
+                console.error("Date parsing error:", e);
                 document.getElementById('nextScan').textContent = "Scheduled (within 12 hours)";
             }
         } else {

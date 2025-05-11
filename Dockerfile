@@ -34,6 +34,7 @@ RUN mkdir -p /app/config
 
 # Add this to your Dockerfile after copying Python files
 COPY pdfservices-api-credentials.json /app/config/
+COPY pdfservices-api-credentials.json /app/config/
 COPY adobe_utils.py /app/
 COPY excel_formatter.py /app/
 

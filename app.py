@@ -9,7 +9,6 @@ import json
 from flask import Flask, render_template, send_from_directory, jsonify, request, Response, redirect, url_for
 from apscheduler.schedulers.background import BackgroundScheduler
 import scraper
-import pdfplumber
 import openpyxl
 from openpyxl.styles import Font, Alignment, Border, Side
 import re
@@ -73,32 +72,17 @@ scheduler.start()
 
 def convert_pdf_to_excel(pdf_path, excel_path):
     """
-    Convert a PDF to Excel using Adobe PDF Services API.
-    
-    Args:
-        pdf_path (str): Path to the source PDF file
-        excel_path (str): Path where the Excel file should be saved
-        
-    Returns:
-        bool: True if conversion was successful, False otherwise
+    Convert a PDF to Excel.
     """
     try:
-        # Use Adobe API with formatting
-        logger.info(f"Converting PDF to Excel using Adobe API: {pdf_path}")
-        
-        # First, use Adobe API to convert
+        logger.info(f"Converting PDF to Excel: {pdf_path}")
         success = adobe_utils.convert_pdf_to_excel(pdf_path, excel_path)
         
         if success:
-            # Apply number formatting
-            format_success = excel_formatter.format_excel_numbers(excel_path)
-            if not format_success:
-                logger.warning(f"Number formatting failed: {excel_path}")
-            
-            logger.info(f"Adobe API conversion successful: {excel_path}")
+            logger.info(f"Conversion successful: {excel_path}")
             return True
         else:
-            logger.error(f"Adobe PDF Services API conversion failed for: {pdf_path}")
+            logger.error(f"PDF to Excel conversion failed for: {pdf_path}")
             return False
     
     except Exception as e:
@@ -232,6 +216,10 @@ def convert_report(report_id):
         success = convert_pdf_to_excel(pdf_path, excel_path)
         if not success:
             return jsonify({'error': 'Failed to convert PDF to Excel'}), 500
+
+        # Add the monthly table for PC reports
+        if report['type'] == 'PC':
+            excel_formatter.extract_monthly_table(excel_path)
     
     # Redirect to the Excel file
     return redirect(url_for('serve_excel', filename=os.path.basename(excel_path)))
@@ -388,6 +376,8 @@ def convert_all_pdfs():
             # Convert PDF to Excel
             success = convert_pdf_to_excel(pdf_path, excel_path)
             if success:
+                if report['type'] == 'PC':
+                    excel_formatter.extract_monthly_table(excel_path)
                 success_count += 1
             else:
                 fail_count += 1

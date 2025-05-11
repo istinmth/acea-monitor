@@ -171,11 +171,18 @@ def extract_date(date_text):
         logger.warning(f"Could not parse date: {date_text}")
         return datetime.datetime.now().strftime('%Y-%m-%d')
 
-def is_report_processed(url):
-    """Check if a report URL has already been processed."""
+def is_report_processed(url, filename=None):
+    """Check if a report URL or filename has already been processed."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT id FROM reports WHERE pdf_url = ? OR url = ?", (url, url))
+    
+    if filename:
+        # Check if the filename exists in any PDF path
+        cursor.execute("SELECT id FROM reports WHERE pdf_url = ? OR url = ? OR pdf_path LIKE ?", 
+                      (url, url, f'%{filename}'))
+    else:
+        cursor.execute("SELECT id FROM reports WHERE pdf_url = ? OR url = ?", (url, url))
+    
     result = cursor.fetchone()
     conn.close()
     return result is not None
@@ -282,12 +289,13 @@ def download_direct_pdfs():
     # Download PC reports
     pc_count = 0
     for url in pc_urls:
-        if is_report_processed(url):
-            logger.info(f"Already processed PC PDF: {url}")
-            continue
-        
         # Extract filename from URL
         filename = os.path.basename(url)
+        
+        # Check if already processed by URL or filename
+        if is_report_processed(url, filename):
+            logger.info(f"Already processed PC PDF: {url} or {filename}")
+            continue
         
         # Try to download
         pdf_path = download_pdf(url, filename)
@@ -314,12 +322,13 @@ def download_direct_pdfs():
     # Download CV reports
     cv_count = 0
     for url in cv_urls:
-        if is_report_processed(url):
-            logger.info(f"Already processed CV PDF: {url}")
-            continue
-        
         # Extract filename from URL
         filename = os.path.basename(url)
+        
+        # Check if already processed by URL or filename
+        if is_report_processed(url, filename):
+            logger.info(f"Already processed CV PDF: {url} or {filename}")
+            continue
         
         # Try to download
         pdf_path = download_pdf(url, filename)
